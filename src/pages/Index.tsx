@@ -1,24 +1,32 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from "sonner";
-import ImageSelector from '@/components/ImageSelector';
+import { Download, RefreshCw } from 'lucide-react';
 import TextControls, { TextSettings } from '@/components/TextControls';
 import MemeCanvas from '@/components/MemeCanvas';
-import { ArrowDown, Download } from 'lucide-react';
+import MemeGrid, { Meme } from '@/components/MemeGrid';
+import { useQuery } from '@tanstack/react-query';
+import { fetchMemes } from '@/services/memeService';
 
 const Index = () => {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [textSettings, setTextSettings] = useState<TextSettings>({
     topText: 'TOP TEXT',
     bottomText: 'BOTTOM TEXT',
     fontSize: 36,
     textColor: 'white',
   });
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
-  const handleImageSelect = (url: string) => {
-    setImageUrl(url);
+  const { data: memes, isLoading, refetch } = useQuery({
+    queryKey: ['memes'],
+    queryFn: fetchMemes,
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+  
+  const handleMemeSelect = (meme: Meme) => {
+    setSelectedMeme(meme);
+    toast.success(`"${meme.name}" template selected!`);
   };
   
   const handleTextSettingsChange = (newSettings: TextSettings) => {
@@ -51,6 +59,11 @@ const Index = () => {
     }
   };
   
+  const handleRefresh = () => {
+    refetch();
+    toast.success('Refreshing meme templates...');
+  }
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 py-6 sm:py-12">
       <div className="container px-4 sm:px-6 animate-fade-in">
@@ -63,15 +76,22 @@ const Index = () => {
           </p>
         </header>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <MemeCanvas 
-              imageUrl={imageUrl} 
-              textSettings={textSettings} 
-            />
-            
-            {imageUrl && (
-              <div className="flex justify-center">
+        {selectedMeme ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <MemeCanvas 
+                imageUrl={selectedMeme.url} 
+                textSettings={textSettings} 
+              />
+              
+              <div className="flex justify-center gap-4">
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setSelectedMeme(null)}
+                >
+                  Choose Another Template
+                </Button>
                 <Button 
                   variant="default"
                   size="lg"
@@ -82,16 +102,9 @@ const Index = () => {
                   Download Meme
                 </Button>
               </div>
-            )}
-          </div>
-          
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-xl font-semibold">Choose Image</h2>
-              <ImageSelector onSelectImage={handleImageSelect} />
             </div>
             
-            {imageUrl && (
+            <div className="space-y-6">
               <div className="space-y-2 animate-fade-in">
                 <h2 className="text-xl font-semibold">Text Options</h2>
                 <TextControls 
@@ -99,9 +112,29 @@ const Index = () => {
                   onSettingsChange={handleTextSettingsChange}
                 />
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Choose a Meme Template</h2>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2"
+                onClick={handleRefresh}
+              >
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+            </div>
+            <MemeGrid 
+              memes={memes || []}
+              isLoading={isLoading}
+              onMemeSelect={handleMemeSelect}
+            />
+          </div>
+        )}
         
         <footer className="mt-12 text-center text-sm text-muted-foreground">
           <p>Create and share memes with friends!</p>

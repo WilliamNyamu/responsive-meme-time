@@ -106,7 +106,7 @@ const MemeCanvas: React.FC<MemeCanvasProps> = ({ imageUrl, textSettings }) => {
       >
         {!imageUrl && !isImageLoaded && (
           <div className="flex flex-col items-center justify-center text-muted-foreground">
-            <p>Select or upload an image to create your meme</p>
+            <p>Select a meme template to continue</p>
           </div>
         )}
         <canvas 
