@@ -65,31 +65,33 @@ const MemeCanvas: React.FC<MemeCanvasProps> = ({ imageUrl, textSettings }) => {
       
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
-      // Draw the text
-      ctx.textAlign = 'center';
-      ctx.font = `bold ${textSettings.fontSize}px Impact, sans-serif`;
-      ctx.fillStyle = textSettings.textColor;
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = textSettings.fontSize / 15;
-      
-      // Draw top text
-      if (textSettings.topText) {
-        ctx.fillText(textSettings.topText, canvas.width / 2, 40);
-        ctx.strokeText(textSettings.topText, canvas.width / 2, 40);
-      }
-      
-      // Draw bottom text
-      if (textSettings.bottomText) {
-        ctx.fillText(
-          textSettings.bottomText,
-          canvas.width / 2,
-          canvas.height - 20
-        );
-        ctx.strokeText(
-          textSettings.bottomText,
-          canvas.width / 2,
-          canvas.height - 20
-        );
+      // Draw the text only if we have text settings
+      if (textSettings) {
+        ctx.textAlign = 'center';
+        ctx.font = `bold ${textSettings.fontSize}px Impact, sans-serif`;
+        ctx.fillStyle = textSettings.textColor;
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = textSettings.fontSize / 15;
+        
+        // Draw top text
+        if (textSettings.topText) {
+          ctx.fillText(textSettings.topText, canvas.width / 2, 40);
+          ctx.strokeText(textSettings.topText, canvas.width / 2, 40);
+        }
+        
+        // Draw bottom text
+        if (textSettings.bottomText) {
+          ctx.fillText(
+            textSettings.bottomText,
+            canvas.width / 2,
+            canvas.height - 20
+          );
+          ctx.strokeText(
+            textSettings.bottomText,
+            canvas.width / 2,
+            canvas.height - 20
+          );
+        }
       }
       
       setIsImageLoaded(true);

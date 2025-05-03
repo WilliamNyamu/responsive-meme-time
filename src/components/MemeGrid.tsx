@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Grid3X3 } from 'lucide-react';
+import { Grid3X3, Image } from 'lucide-react';
 
 export interface Meme {
   id: string;
@@ -15,16 +15,17 @@ interface MemeGridProps {
   memes: Meme[];
   isLoading: boolean;
   onMemeSelect: (meme: Meme) => void;
+  type: 'template' | 'repository';
 }
 
-const MemeGrid: React.FC<MemeGridProps> = ({ memes, isLoading, onMemeSelect }) => {
+const MemeGrid: React.FC<MemeGridProps> = ({ memes, isLoading, onMemeSelect, type }) => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-muted-foreground">
         <div className="animate-spin mb-2">
           <Grid3X3 className="h-8 w-8" />
         </div>
-        <p>Loading meme templates...</p>
+        <p>Loading {type === 'template' ? 'meme templates' : 'meme repository'}...</p>
       </div>
     );
   }
@@ -32,8 +33,12 @@ const MemeGrid: React.FC<MemeGridProps> = ({ memes, isLoading, onMemeSelect }) =
   if (memes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-muted-foreground">
-        <Grid3X3 className="h-8 w-8 mb-2" />
-        <p>No meme templates found</p>
+        {type === 'template' ? (
+          <Grid3X3 className="h-8 w-8 mb-2" />
+        ) : (
+          <Image className="h-8 w-8 mb-2" />
+        )}
+        <p>No {type === 'template' ? 'meme templates' : 'memes'} found</p>
       </div>
     );
   }
