@@ -1,76 +1,122 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { TextSettings } from './TextControls';
 
 interface MemeCanvasProps {
   imageUrl: string | null;
-  topText: string;
-  bottomText: string;
+  textSettings: TextSettings;
 }
 
-const MemeCanvas: React.FC<MemeCanvasProps> = ({ imageUrl, topText, bottomText }) => {
+const MemeCanvas: React.FC<MemeCanvasProps> = ({ imageUrl, textSettings }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   
-  // Draw the meme on the canvas whenever props change
+  // Handle responsive canvas sizing
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        setDimensions({
+          width: containerWidth,
+          height: containerWidth * 0.75, // 4:3 aspect ratio
+        });
+      }
+    };
+    
+    updateDimensions();
+    
+    window.addEventListener('resize', updateDimensions);
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
+  
+  // Draw the meme on the canvas whenever any props change
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     
     if (!canvas || !ctx || !imageUrl) return;
     
+    canvas.width = dimensions.width;
+    canvas.height = dimensions.height;
+    
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      // Set canvas dimensions based on image
-      canvas.width = img.width;
-      canvas.height = img.height;
+      // Draw image to fit canvas while maintaining aspect ratio
+      const aspectRatio = img.width / img.height;
+      let drawWidth = canvas.width;
+      let drawHeight = canvas.width / aspectRatio;
       
-      // Draw image
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      if (drawHeight > canvas.height) {
+        drawHeight = canvas.height;
+        drawWidth = canvas.height * aspectRatio;
+      }
       
-      // Configure text style
+      const offsetX = (canvas.width - drawWidth) / 2;
+      const offsetY = (canvas.height - drawHeight) / 2;
+      
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      
+      // Draw the text
       ctx.textAlign = 'center';
-      ctx.font = 'bold 36px Impact, sans-serif';
-      ctx.fillStyle = 'white';
+      ctx.font = `bold ${textSettings.fontSize}px Impact, sans-serif`;
+      ctx.fillStyle = textSettings.textColor;
       ctx.strokeStyle = 'black';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = textSettings.fontSize / 15;
       
       // Draw top text
-      if (topText) {
-        ctx.fillText(topText.toUpperCase(), canvas.width / 2, 50);
-        ctx.strokeText(topText.toUpperCase(), canvas.width / 2, 50);
+      if (textSettings.topText) {
+        ctx.fillText(textSettings.topText, canvas.width / 2, 40);
+        ctx.strokeText(textSettings.topText, canvas.width / 2, 40);
       }
       
       // Draw bottom text
-      if (bottomText) {
+      if (textSettings.bottomText) {
         ctx.fillText(
-          bottomText.toUpperCase(),
+          textSettings.bottomText,
           canvas.width / 2,
-          canvas.height - 30
+          canvas.height - 20
         );
         ctx.strokeText(
-          bottomText.toUpperCase(),
+          textSettings.bottomText,
           canvas.width / 2,
-          canvas.height - 30
+          canvas.height - 20
         );
       }
+      
+      setIsImageLoaded(true);
     };
     
     img.src = imageUrl;
-  }, [imageUrl, topText, bottomText]);
+  }, [imageUrl, textSettings, dimensions]);
   
   return (
-    <div className="relative w-full overflow-hidden">
-      {!imageUrl ? (
-        <div className="flex items-center justify-center h-60 bg-gray-100 text-gray-500">
-          Select an image to create a meme
-        </div>
-      ) : (
+    <Card className="p-0 overflow-hidden">
+      <div 
+        ref={containerRef} 
+        className="relative w-full aspect-[4/3] bg-muted/30 flex items-center justify-center"
+      >
+        {!imageUrl && !isImageLoaded && (
+          <div className="flex flex-col items-center justify-center text-muted-foreground">
+            <p>Select or upload an image to create your meme</p>
+          </div>
+        )}
         <canvas 
           ref={canvasRef}
-          className="max-w-full h-auto"
+          className={`max-w-full max-h-full ${!isImageLoaded ? 'hidden' : ''}`}
+          width={dimensions.width}
+          height={dimensions.height}
         />
-      )}
-    </div>
+      </div>
+    </Card>
   );
 };
 

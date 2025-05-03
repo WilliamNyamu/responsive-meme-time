@@ -64,10 +64,9 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				meme: {
-					'purple': '#8B1CB9', // Updated to match image purple
-					'purple-light': '#9F3BC6',
-					'purple-dark': '#70169A',
-					'bg': '#FFFFFF',
+					'purple': '#8B5CF6',
+					'purple-light': '#C4B5FD',
+					'purple-dark': '#6D28D9',
 				},
 			},
 			borderRadius: {
