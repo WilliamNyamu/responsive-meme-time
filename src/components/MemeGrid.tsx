@@ -21,7 +21,7 @@ interface MemeGridProps {
 const MemeGrid: React.FC<MemeGridProps> = ({ memes, isLoading, onMemeSelect, type }) => {
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-muted-foreground">
+      <div className="flex flex-col items-center justify-center p-12 text-muted-foreground animate-pulse">
         <div className="animate-spin mb-2">
           <Grid3X3 className="h-8 w-8" />
         </div>
@@ -44,20 +44,23 @@ const MemeGrid: React.FC<MemeGridProps> = ({ memes, isLoading, onMemeSelect, typ
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 animate-fade-in">
       {memes.map((meme) => (
         <Card 
           key={meme.id}
-          className="overflow-hidden border cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+          className="overflow-hidden border cursor-pointer hover:ring-2 hover:ring-primary transition-all hover:shadow-md hover:-translate-y-1"
           onClick={() => onMemeSelect(meme)}
         >
           <div className="aspect-square relative overflow-hidden bg-muted">
             <img
               src={meme.url}
               alt={meme.name}
-              className="object-cover w-full h-full"
+              className="object-cover w-full h-full transition-transform hover:scale-105"
               loading="lazy"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end justify-center">
+              <p className="text-xs text-white font-medium mb-2">Click to select</p>
+            </div>
           </div>
           <div className="p-2 text-sm font-medium truncate text-center">
             {meme.name}

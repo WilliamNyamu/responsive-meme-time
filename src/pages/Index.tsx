@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from "sonner";
-import { Download, RefreshCw, Image, ImageIcon } from 'lucide-react';
+import { Download, RefreshCw, Image, ImageIcon, ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TextControls, { TextSettings } from '@/components/TextControls';
 import MemeCanvas from '@/components/MemeCanvas';
@@ -90,7 +90,9 @@ const Index = () => {
       link.click();
       document.body.removeChild(link);
       
-      toast.success('Meme downloaded!');
+      toast.success('Meme downloaded successfully!', {
+        description: 'Your masterpiece is ready to share.'
+      });
     } catch (error) {
       console.error('Error downloading meme:', error);
       toast.error('Failed to download meme');
@@ -113,36 +115,47 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 py-6 sm:py-12">
-      <div className="container px-4 sm:px-6 animate-fade-in">
-        <header className="text-center mb-8">
+      <div className="container px-4 sm:px-6 max-w-7xl mx-auto">
+        <header className="text-center mb-8 animate-fade-in">
+          <div className="inline-block mb-2">
+            <div className="relative flex items-center justify-center w-16 h-16 mx-auto mb-2 overflow-hidden rounded-full bg-primary/10">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full"></div>
+              <Image className="w-8 h-8 text-primary" />
+            </div>
+          </div>
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-meme-purple to-meme-purple-dark text-transparent bg-clip-text">
             Meme Generator
           </h1>
-          <p className="text-muted-foreground mt-2">
-            Create, customize, and download hilarious memes
+          <p className="text-muted-foreground mt-2 max-w-md mx-auto">
+            Create, customize, and download hilarious memes to share with friends and family
           </p>
         </header>
         
         {selectedMeme ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
             <div className="lg:col-span-2 space-y-6">
+              <div className="flex items-center mb-2">
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBackToGrid}
+                  className="gap-1 text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to gallery
+                </Button>
+              </div>
+              
               <MemeCanvas 
                 imageUrl={selectedMeme.url} 
                 textSettings={textSettings} 
               />
               
-              <div className="flex justify-center gap-4">
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  onClick={handleBackToGrid}
-                >
-                  Choose Another {activeTab === 'templates' ? 'Template' : 'Meme'}
-                </Button>
+              <div className="flex justify-center gap-4 mt-6">
                 <Button 
                   variant="default"
                   size="lg"
-                  className="text-white gap-2"
+                  className="text-white gap-2 shadow-md hover:shadow-lg transition-all"
                   onClick={handleDownload}
                 >
                   <Download className="h-4 w-4" />
@@ -155,6 +168,7 @@ const Index = () => {
               <div className="space-y-6">
                 <div className="space-y-2 animate-fade-in">
                   <h2 className="text-xl font-semibold">Text Options</h2>
+                  <p className="text-sm text-muted-foreground">Customize your meme text</p>
                   <TextControls 
                     settings={textSettings} 
                     onSettingsChange={handleTextSettingsChange}
@@ -164,14 +178,14 @@ const Index = () => {
             )}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             <Tabs 
               value={activeTab} 
               onValueChange={(value) => setActiveTab(value as 'templates' | 'repository')}
               className="w-full"
             >
               <div className="flex justify-between items-center mb-4">
-                <TabsList>
+                <TabsList className="shadow-sm">
                   <TabsTrigger value="templates" className="flex items-center gap-2">
                     <ImageIcon className="h-4 w-4" />
                     Templates
@@ -184,7 +198,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 shadow-sm"
                   onClick={handleRefresh}
                 >
                   <RefreshCw className="h-4 w-4" />
@@ -192,8 +206,15 @@ const Index = () => {
                 </Button>
               </div>
               
-              <TabsContent value="templates" className="mt-0">
-                <h2 className="text-xl font-semibold mb-4">Choose a Meme Template</h2>
+              <TabsContent value="templates" className="mt-0 focus-visible:outline-none">
+                <div className="bg-white/50 dark:bg-gray-800/50 p-6 rounded-lg border shadow-sm mb-6">
+                  <h2 className="text-xl font-semibold mb-2">Create Your Own Meme</h2>
+                  <p className="text-muted-foreground">
+                    Select a template below, add your custom text, and download your creation!
+                  </p>
+                </div>
+                
+                <h3 className="text-lg font-semibold mb-4">Choose a Template</h3>
                 <MemeGrid 
                   memes={memes || []}
                   isLoading={isLoading}
@@ -202,8 +223,15 @@ const Index = () => {
                 />
               </TabsContent>
               
-              <TabsContent value="repository" className="mt-0">
-                <h2 className="text-xl font-semibold mb-4">Browse Meme Repository</h2>
+              <TabsContent value="repository" className="mt-0 focus-visible:outline-none">
+                <div className="bg-white/50 dark:bg-gray-800/50 p-6 rounded-lg border shadow-sm mb-6">
+                  <h2 className="text-xl font-semibold mb-2">Browse Ready-Made Memes</h2>
+                  <p className="text-muted-foreground">
+                    Find and download pre-made memes from our collection!
+                  </p>
+                </div>
+                
+                <h3 className="text-lg font-semibold mb-4">Popular Memes</h3>
                 <MemeGrid 
                   memes={repositoryMemes || []}
                   isLoading={isLoadingRepo}
@@ -215,8 +243,9 @@ const Index = () => {
           </div>
         )}
         
-        <footer className="mt-12 text-center text-sm text-muted-foreground">
+        <footer className="mt-12 text-center text-sm text-muted-foreground border-t pt-6">
           <p>Create and share memes with friends!</p>
+          <p className="text-xs mt-1 opacity-70">All meme templates are used for entertainment purposes</p>
         </footer>
       </div>
     </div>

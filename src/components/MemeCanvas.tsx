@@ -63,7 +63,19 @@ const MemeCanvas: React.FC<MemeCanvasProps> = ({ imageUrl, textSettings }) => {
       const offsetX = (canvas.width - drawWidth) / 2;
       const offsetY = (canvas.height - drawHeight) / 2;
       
+      // Add a subtle shadow to the image
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      
+      // Reset shadow for text
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
       
       // Draw the text only if we have text settings
       if (textSettings) {
@@ -75,21 +87,23 @@ const MemeCanvas: React.FC<MemeCanvasProps> = ({ imageUrl, textSettings }) => {
         
         // Draw top text
         if (textSettings.topText) {
-          ctx.fillText(textSettings.topText, canvas.width / 2, 40);
-          ctx.strokeText(textSettings.topText, canvas.width / 2, 40);
+          const topY = offsetY + 40;
+          ctx.fillText(textSettings.topText, canvas.width / 2, topY);
+          ctx.strokeText(textSettings.topText, canvas.width / 2, topY);
         }
         
         // Draw bottom text
         if (textSettings.bottomText) {
+          const bottomY = offsetY + drawHeight - 20;
           ctx.fillText(
             textSettings.bottomText,
             canvas.width / 2,
-            canvas.height - 20
+            bottomY
           );
           ctx.strokeText(
             textSettings.bottomText,
             canvas.width / 2,
-            canvas.height - 20
+            bottomY
           );
         }
       }
@@ -101,19 +115,20 @@ const MemeCanvas: React.FC<MemeCanvasProps> = ({ imageUrl, textSettings }) => {
   }, [imageUrl, textSettings, dimensions]);
   
   return (
-    <Card className="p-0 overflow-hidden">
+    <Card className="p-0 overflow-hidden shadow-lg">
       <div 
         ref={containerRef} 
-        className="relative w-full aspect-[4/3] bg-muted/30 flex items-center justify-center"
+        className="relative w-full aspect-[4/3] bg-gradient-to-r from-muted/40 to-muted/20 flex items-center justify-center"
       >
         {!imageUrl && !isImageLoaded && (
           <div className="flex flex-col items-center justify-center text-muted-foreground">
-            <p>Select a meme template to continue</p>
+            <p className="font-medium">Select a meme template to continue</p>
+            <p className="text-xs opacity-70 mt-1">Choose from the gallery below</p>
           </div>
         )}
         <canvas 
           ref={canvasRef}
-          className={`max-w-full max-h-full ${!isImageLoaded ? 'hidden' : ''}`}
+          className={`max-w-full max-h-full rounded-sm ${!isImageLoaded ? 'hidden' : ''}`}
           width={dimensions.width}
           height={dimensions.height}
         />
